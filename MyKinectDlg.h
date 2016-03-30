@@ -6,7 +6,12 @@
 
 #include "NuiApi.h"
 #include <d2d1.h>
-#include "Render.h"
+#include "KinectInteraction.h"	//Interaction
+
+#include "RenderColorFrame.h"
+#include "RenderDepthFrame.h"
+#include "RenderSkeleton.h"
+#include "InteractionClient.h"
 
 // CMyKinectDlg ¶Ô»°¿ò
 class CMyKinectDlg : public CDialogEx
@@ -33,6 +38,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnBnClickedBtnSwitch();
 	afx_msg void OnClickedCheckShowWhich();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -46,14 +52,19 @@ public:
 	void ProcessSkeleton();
 	void ProcessColorFrame();
 	void ProcessDepthFrame();
+	void ProcessInteration();
 	void SetStatusMessage(WCHAR* szMessage);
+	void JudgeHandGesture(const NUI_HANDPOINTER_INFO&  HandPointerInfos);
 	
 private:
 	INuiSensor*				m_pNuiSensor;
+	INuiInteractionStream*	m_pInterStream;
 	//event
 	HANDLE					m_hNextSkeletonEvent;
 	HANDLE                  m_hNextColorFrameEvent;
 	HANDLE					m_hNextDepthFrameEvent;
+	HANDLE					m_hNextInteractionEvent;	//interaction
+
 	//handle
 	HANDLE                  m_ColorStreamHandle;
 	HANDLE					m_DepthStreamHandle;
@@ -61,9 +72,17 @@ private:
 	LONG                     m_sourceStride;
 
 	bool					m_bOpen;
-	CRender*				m_pRenderColor;
-	CRender*				m_pRenderDepth;
+	CRenderColorFrame*		m_pRenderColor;
+	CRenderDepthFrame*		m_pRenderDepth;
+	CRenderSkeleton*		m_pRenderFront;
+	CRenderSkeleton*		m_pRenderSide;
+	CRenderSkeleton*		m_pRenderTop;
 	bool					m_bShowSkeleton;
 	bool					m_bShowImage;
 	bool					m_bShowDepth;
+
+	bool					m_bIsFullScreen;
+	bool					m_bHasInit;
+	CWnd*					m_pTestWnd;
+	CInteractionClient		m_InteractionClient;
 };
